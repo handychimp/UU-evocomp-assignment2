@@ -75,6 +75,7 @@ class Colouring:
         if colouring ==[[]]:                  
             colouring = self.colouring
             commit=True
+            print('Why are you here?')
         else:
             commit=False
         
@@ -137,7 +138,7 @@ class Colouring:
             else:
                 non_improvement+=1
             
-            print('Best Fitness: ' + str(best_total_fitness) + ' Challenger Fitness' + str(results[0]) + ' Non-Improvement: ' + str(non_improvement))
+            print('Best Fitness: ' + str(best_total_fitness) + ' Challenger Fitness: ' + str(results[0]) + ' Non-Improvement: ' + str(non_improvement))
             
         self.colouring = best_colouring
         self.fitness = best_total_fitness

@@ -4,25 +4,44 @@ Created on Fri Mar 16 16:58:30 2018
 
 @author: Tom
 """
-import GenerationColouring as gc
+import GenerationColouring2 as gc
 import numpy as np
 import pickle
+import multiprocessing as mp
+
+def getKey(item):
+    return item[0]
 
 if __name__ == '__main__':
-    __spec__ = "ModuleSpec(name='builtins', loader=<class '_frozen_importlib.BuiltinImporter'>)"
+   # __spec__ = "ModuleSpec(name='builtins', loader=<class '_frozen_importlib.BuiltinImporter'>)"
     graph = np.genfromtxt('le450_15c_edges.csv',delimiter=',')
     #bug where first read character is shown as NaN instead of its value. Manually override this.
     graph[0,0] = 1 
    
-    colouring = np.asarray([range(1,451),[1]*450])
-    colouring = colouring.transpose()    
+    colouring = np.asarray([range(0,451),[1]*451])
+    colouring = colouring.transpose()  
+    
+    
+    
     col_1 = gc.Colouring(graph,colouring)
+    
     col_1.calc_fitness()
-    col_1.vertex_fitness[0]
-   
+    col_1.fitness
     
     col_1.colours = 2
     col_1.local_search()
+    #test=col_1.colouring
+    #col_1.calc_fitness(col_1.colouring)
+    #col_1.colouring 
+  
+    #test = col_1.colouring
+    #test = test[test[:,0].argsort()]
+   #col_1.colouring
+  
+  #    colouring.view().sort(order=['f0'], axis = 0)
+    
+
+#graph[(graph[:,0]==450) | (graph[:,1]==450)]
 #    col_1.fitness
 #    col_1.vertex_fitness
 #    col_1.colouring
