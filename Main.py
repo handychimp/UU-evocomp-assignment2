@@ -8,6 +8,18 @@ import GenerationColouring2 as gc
 import numpy as np
 import pickle
 import multiprocessing as mp
+import operator
+
+list1 = [1,2,3]
+list2 = [2,4,6]
+list3 = [[1,2,3],[4,5,6]]
+
+for x in list3:
+    for y in x:
+        print(y)
+
+len(set(list1) & set(list2))
+
 
 def getKey(item):
     return item[0]
@@ -21,15 +33,31 @@ if __name__ == '__main__':
     colouring = np.asarray([range(0,451),[1]*451])
     colouring = colouring.transpose()  
     
-    
-    
     col_1 = gc.Colouring(graph,colouring)
+    col_1.colouring=col_1.random_colouring()
+    #col_1.colouring
     
     col_1.calc_fitness()
     col_1.fitness
     
     col_1.colours = 2
     col_1.local_search()
+    
+    test =[[1,2,3],[4,5,6,7,8],[],[9]]
+    for colourset in test:
+        colourset.remove(6)
+    test.remove(6)
+    test3=[4,5,6,7,8]
+    6 in test3
+
+    lens = [len(z) for z in test]
+    
+    newset = []    
+    for colourset in test:
+        x = colourset
+        if 6 in colourset:
+            x.remove(6)
+        newset.append(x)
     #test=col_1.colouring
     #col_1.calc_fitness(col_1.colouring)
     #col_1.colouring 
@@ -101,4 +129,4 @@ if __name__ == '__main__':
 
     
     """
-        
+        graph.shape[1]
