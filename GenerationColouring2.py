@@ -224,7 +224,7 @@ class Generation:
         for colouring in self.population:
             pop_fitness.append(colouring.fitness)
         
-        avg_fitness = avg(pop_fitness)
+        avg_fitness = np.mean(pop_fitness)
         
         self.avg_fitness = avg_fitness
         
