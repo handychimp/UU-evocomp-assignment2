@@ -28,9 +28,9 @@ if __name__ == '__main__':
         best_fitness = current_gen.avg_fitness
         print('Generation 0 ... Avg_Fitness: ' + str(current_gen.avg_fitness))
         
-        while non_improvement < 100:
+        while non_improvement < 5:
             
-            current_gen = current_gen.create_next_gen
+            current_gen = current_gen.create_next_gen()
             generations.append(current_gen)
             fitnesses.append(current_gen.calc_avg_fitness())
             
