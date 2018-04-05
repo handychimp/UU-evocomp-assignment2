@@ -9,6 +9,8 @@ import numpy as np
 import copy
 import random
 import operator
+from multiprocessing import Pool
+import pickle
 
 class Colouring:
     
@@ -182,18 +184,24 @@ class Generation:
     
     def __init__(self,graph,colours,population=[],pop_size=None,gen_number=0):
         self.gen_number=gen_number
-        self.initialise_graph(graph)
+        if graph.shape[0] != graph.shape[1]:
+            self.initialise_graph(graph)
         self.colours = colours
         self.population = population
         if population == []:
             ###can probably parallelise this
-            for i in range(0,pop_size):
-                print('Population Member: ' + str(i))
-                self.create_member(i)
+            p=Pool()
+            results = p.map(self.create_member,range(0,pop_size))
+            p.close()
+            p.join()
+#            for i in range(0,pop_size):
+#                print('Population Member: ' + str(i))
+#                self.create_member(i)
+            self.population=results
             self.pop_size=pop_size
             self.id_counter=pop_size
         else:
-            for i in range(0,pop_size):
+            for i in range(0,len(population)):
                 population[i].m_id = i
             self.pop_size=len(population)
             self.id_counter = len(self.population)
@@ -208,7 +216,9 @@ class Generation:
         colouring.calc_fitness()
         colouring.local_search()
         colouring.make_chromosome()
-        self.population.append(colouring)        
+        self.population.append(colouring)
+        
+        return colouring        
     
     def initialise_graph(self,graph):
         
@@ -252,17 +262,17 @@ class Generation:
         
         self.avg_fitness = avg_fitness
         
-    def gpx_crossover(self,x,y):
+    def gpx_crossover(self,x_parent,y_parent):
         print('Crossover Started')
         ###take the chromosome from the Colouring opjects and copy to local variables for editing
 		###Store variables a list of the length of each sublist, for selecting largest list
-        x_chromosome1 = copy.deepcopy(x.chromosome)
+        x_chromosome1 = copy.deepcopy(x_parent.chromosome)
         x_chromosome1_len = [len(x) for x in x_chromosome1]
-        y_chromosome1 = copy.deepcopy(y.chromosome)
+        y_chromosome1 = copy.deepcopy(y_parent.chromosome)
         y_chromosome1_len = [len(y) for y in y_chromosome1]
-        x_chromosome2 = copy.deepcopy(x.chromosome)
+        x_chromosome2 = copy.deepcopy(x_parent.chromosome)
         x_chromosome2_len = [len(x) for x in x_chromosome2]
-        y_chromosome2 = copy.deepcopy(y.chromosome)
+        y_chromosome2 = copy.deepcopy(y_parent.chromosome)
         y_chromosome2_len = [len(y) for y in y_chromosome2]
         
 		##Initialise child solutions
@@ -274,7 +284,6 @@ class Generation:
         first_parent = True
 		###Repeat until the child has a number of lists equal to the number of colours set in this Generation object
         for i in range (0,self.colours):
-            print('Colourset ' + str(i))
             if first_parent:
 				###Get the index of the longest lists for the x chromosome for first child and y chromosme for second child
                 x_index,x_max = max(enumerate(x_chromosome1_len), key=operator.itemgetter(1))
@@ -283,50 +292,45 @@ class Generation:
 				###Add the lists from appropriate index (largest sublist) to the solution
                 child1.append(x_chromosome1[x_index])
                 child2.append(y_chromosome2[y_index])
-                print(child1)
-                print(child2)
                 first_parent = False
                 
                 print('Group appended')
                 ##For all points in the sublist selected for the x chromosome, remove it from the x and y chromosomes for that child
                 for vertex in x_chromosome1[x_index]:
-                    new_x1=[]
                     new_y1=[]
-                    for partition in x_chromosome1:
-                        ##Lists are recreated here...printing suggests that these are working as expected
-                        print('original partition:' + str(partition))
-                        partition[:]=[x for x in partition if x != vertex]     
-                        new_x1.append(partition)
-                        print('vertex: ' + str(vertex))
-                        print(partition)
+
                         
                     for partition in y_chromosome1:
-                        print('original partition:' + str(partition))
                         partition[:]=[y for y in partition if y != vertex]
                         new_y1.append(partition)
-                        print('vertex: ' + str(vertex))
-                        print(partition)
-                    x_chromosome1 = copy.copy(new_x1)
+
                     y_chromosome1 = copy.copy(new_y1)
+                
+                del x_chromosome1[x_index]
                 ##For all points in the sublist selected for the x chromosome, remove it from the x and y chromosomes for that child
                 for vertex in y_chromosome2[y_index]:
                     new_x2=[]
-                    new_y2=[]
+                    #new_y2=[]
                     for partition in x_chromosome2:
-                        print('original partition:' + str(partition))
+                        #print('original partition:' + str(partition))
                         partition[:]=[x for x in partition if x != vertex]  
                         new_x2.append(partition)
-                        print('vertex: ' + str(vertex))
-                        print(partition)
+                        #print('vertex: ' + str(vertex))
+                        #print(partition)
                 
-                    for partition in y_chromosome2:
-                        print('original partition:' + str(partition))
-                        partition[:]=[y for y in partition if y != vertex]
-                        new_y2.append(partition)
-                        print('vertex: ' + str(vertex))
-                        print(partition)
+#                    for partition in y_chromosome2:
+#                        #print('original partition:' + str(partition))
+#                        partition[:]=[y for y in partition if y != vertex]
+#                        new_y2.append(partition)
+#                        #print('vertex: ' + str(vertex))
+#                        #print(partition)
+                    
+                    print('x_chromo_id:' + str(id(x_chromosome2)))
+                    print('new_x_chromo_id:' + str(id(new_x2)))
                     x_chromosome2 = copy.copy(new_x2)
-                    y_chromosome2 = copy.copy(new_y2)
+                    #y_chromosome2 = copy.copy(new_y2)
+                    print('Assigned new_x_chromo_id:' + str(id(x_chromosome2)))
+                del y_chromosome2[y_index]
                 print('placed groups removed')
                 
 				##Recalculate the lengths of sublists for all chromosome
@@ -342,32 +346,32 @@ class Generation:
 
                 child1.append(y_chromosome1[y_index])
                 child2.append(x_chromosome2[x_index])
-                print(child1)
-                print(child2)
+                
                 first_parent = True
-                print('Colourset appended')
+                #print('Colourset appended')
                 
                 for vertex in y_chromosome1[y_index]:
                     new_x1 = []
-                    new_y1 = []
+                    #new_y1 = []
                     for partition in x_chromosome1:
                         partition[:]=[x for x in partition if x != vertex]     
                         new_x1.append(partition)
                         
-                    for partition in y_chromosome1:
-                        partition[:]=[y for y in partition if y != vertex]
-                        new_y1.append(partition)
+#                    for partition in y_chromosome1:
+#                        partition[:]=[y for y in partition if y != vertex]
+#                        new_y1.append(partition)
                     
                     x_chromosome1 = copy.copy(new_x1)
-                    y_chromosome1 = copy.copy(new_y2)
-                
+                    #y_chromosome1 = copy.copy(new_y2)
+                del y_chromosome1[y_index]
+
                 for vertex in x_chromosome2[x_index]:
-                    new_x2 = []
+                    #new_x2 = []
                     new_y2 = []
                     
-                    for partition in x_chromosome2:
-                        partition[:]=[x for x in partition if x != vertex]     
-                        new_x2.append(partition)    
+#                    for partition in x_chromosome2:
+#                        partition[:]=[x for x in partition if x != vertex]     
+#                        new_x2.append(partition)    
                         
                     for partition in y_chromosome2:
                         partition[:]=[y for y in partition if y != vertex]
@@ -375,6 +379,8 @@ class Generation:
                     
                     x_chromosome2 = copy.copy(new_x2)
                     y_chromosome2 = copy.copy(new_y2)
+                
+                del x_chromosome2[x_index]
                     
                 print('Places set removed')
     
@@ -438,18 +444,19 @@ class Generation:
             #[z.remove(vertex)  for z in x_chromosome2 if vertex in z]
             #Dont need as all gathered from x
             #[z.remove(vertex)  for z in y_chromosome1 if vertex in z]
-        return (child1,child2,x_chromosome1,x_chromosome2,invalid_edges1,invalid_edges2)
+        #return (child1,child2,x_chromosome1,x_chromosome2,vertex_remaining1,vertex_remaining2)
+        c1_colouring = Colouring(graph=self.graph,colours=self.colours)
+        c2_colouring = Colouring(graph=self.graph,colours=self.colours)
+        c1_colouring = c1_colouring.colouring_from_chromosome(child1)
+        c2_colouring = c2_colouring.colouring_from_chromosome(child2)
         
-#        c1_colouring = Colouring(graph=self.graph,colours=self.colours)
-#        c1_colouring.colouring_from_chromosome(child1)
-#        c2_colouring = Colouring(graph=self.graph,colours=self.colours)
-#        c2_colouring.colouring_from_chromosome(child2)
-#        
-#        self.children.append(c1_colouring)
-#        self.children.append(c2_colouring)
-#        selected1, selected2 = self.family_competition(x,y,c1_colouring,c2_colouring)
-#        self.next_gen.append(selected1)
-#        self.next_gen.append(selected2)
+        self.children.append(c1_colouring)
+        self.children.append(c2_colouring)
+        selected1, selected2 = self.family_tournament(x_parent,y_parent,c1_colouring,c2_colouring)
+        self.next_gen.append(selected1)
+        self.next_gen.append(selected2)
+        
+        return (selected1,selected2)
     
     def colouring_from_chromosome(self,chromosome):
         colouring = []
@@ -469,6 +476,7 @@ class Generation:
         
         
     def family_tournament(self,p1,p2,c1,c2):
+        print('Starting family tournament')
         parents=[]
         parents.append(p1)
         parents.append(p2)
@@ -490,16 +498,35 @@ class Generation:
         f_index,f_min = min(enumerate(family_fitness),key=operator.itemgetter(1))
         selected.append(family[f_index])
     
+        print('Selection complete')
         return (selected[0],selected[1])
     
     
     def create_next_gen(self):
         half_pop = int(self.pop_size/2)
-        
+        print('Population length:' + str(len(self.population)))
+        print('Pop_size: ' + str(self.pop_size))
+        print('Half_pop: ' + str(half_pop))
+        pool_args = []
         for i in range (0,half_pop):
-            print('Generation ' + str(self.gen_number) + ' Population Member ' + str(i) + ' & ' + str(i+1))
-            self.gpx_crossover(self.population[2*i],self.population[2*i+1])
-        
+            pool_args.append((self.population[2*i],self.population[2*i+1]))    
+         
+        p=Pool()
+        results = p.starmap(self.gpx_crossover,pool_args)
+        p.close()
+        p.join()
+
+        with open('results_mptest','wb') as fp:
+            pickle.dump(results,fp)  
+       
+        for i in results:
+            for j in i:
+                self.next_gen.append(j)
+
+        print('Length results:' + str(len(results)))
+        print('Length next_gen:' + str(len(self.next_gen)))
+        #with open('gen_mptest','wb') as fp:
+        #pickle.dump(generations,fp) 
         new_gen = Generation(graph=self.graph,colours=self.colours,population=self.next_gen,gen_number=self.gen_number+1)
         
         return new_gen
