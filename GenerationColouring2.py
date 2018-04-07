@@ -226,11 +226,12 @@ class Generation:
     def create_member(self,m_id):
         print('Generation ' + str(self.gen_number) + ' Member ID: ' + str(m_id))
         colouring = Colouring(self.graph,colours=self.colours,m_id=m_id)
+        colouring.rand_state=np.random.RandomState(colouring.m_id)
         colouring.colouring = colouring.random_colouring()
         colouring.calc_fitness()
         colouring.local_search()
         colouring.make_chromosome()
-        colouring.rand_state=np.random.RandomState(colouring.m_id)
+
         self.population.append(colouring)
         
         return colouring        
