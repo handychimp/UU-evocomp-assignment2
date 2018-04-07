@@ -10,5 +10,5 @@ import GenerationColouring2 as gc
 
 if __name__ == '__main__':
     
-    with open('Test_Output6','rb') as fp:
+    with open('Test2_Output18','rb') as fp:
         gens = pickle.load(fp)

@@ -24,7 +24,7 @@ class Colouring:
         self.colouring = colouring
         self.colours = colours
         self.fitness=None
-        self.seed=None
+        self.rand_state=None
         self.m_id=m_id
 
     def initialise_graph(self,graph):
@@ -63,7 +63,7 @@ class Colouring:
     def random_colouring(self):
         size = len(self.graph)
         colours = self.colours
-        colouring=[range(0,size),np.random.randint(1,colours+1,size=size)]
+        colouring=[range(0,size),self.rand_state.randint(1,colours+1,size=size)]
         colouring = np.asarray(colouring)
         colouring = colouring.transpose()
         
@@ -110,7 +110,7 @@ class Colouring:
         
         print('Initial Fitness: ' + str(best_total_fitness))
         while non_improvement < 100:
-            challenger_colouring=copy.copy(self.colouring)
+            challenger_colouring=copy.deepcopy(self.colouring)
             np.random.shuffle(challenger_colouring)
             
             for vertex in challenger_colouring[:,0]:
@@ -139,7 +139,7 @@ class Colouring:
             if results[0] < best_total_fitness:
                 best_total_fitness = results[0]
                 best_vertex_fitness = results[1]
-                best_colouring=copy.copy(challenger_colouring)
+                best_colouring=copy.deepcopy(challenger_colouring)
                 non_improvement = 0
                 #print('New Fitness:' + str(best_total_fitness))
             else:
@@ -176,11 +176,19 @@ class Colouring:
                 colouring.append([vertex,colour])
             colour += 1
         colouring=np.asarray(colouring)
-        np.sort(colouring, axis=0)
-        new_colouring = Colouring(self.graph,colouring=colouring,colours=self.colours)
+        sort_index = np.argsort(colouring[:,0])
+        colouring2=copy.deepcopy(colouring)
+        pointer = 0
+        for x in sort_index:
+            colouring2[pointer] = colouring[x]
+            pointer += 1
+        
+        
+        new_colouring = Colouring(self.graph,colouring=colouring2,colours=self.colours)
         new_colouring.calc_fitness()
-        new_colouring.local_search()
-        new_colouring.make_chromosome()
+        #new_colouring.local_search()
+        #new_colouring.make_chromosome()
+        new_colouring.chromosome = chromosome
         
         return new_colouring        
         
@@ -193,7 +201,7 @@ class Generation:
         else:
             self.graph = graph
         self.colours = colours
-        self.population = population
+        self.population = copy.deepcopy(population)
         if population == []:
             ###can probably parallelise this
             p=Pool()
@@ -222,6 +230,7 @@ class Generation:
         colouring.calc_fitness()
         colouring.local_search()
         colouring.make_chromosome()
+        colouring.rand_state=np.random.RandomState(colouring.m_id)
         self.population.append(colouring)
         
         return colouring        
@@ -469,6 +478,13 @@ class Generation:
         c2_colouring = Colouring(graph=self.graph,colours=self.colours)
         c1_colouring = c1_colouring.colouring_from_chromosome(child1)
         c2_colouring = c2_colouring.colouring_from_chromosome(child2)
+        rand_1 = x_parent.rand_state.randint(100) + y_parent.rand_state.randint(100)
+        rand_2 = x_parent.rand_state.randint(100) + y_parent.rand_state.randint(100)
+        c1_colouring.rand_state = np.random.rand_state(rand_1)
+        c1_colouring.rand_state = np.random.rand_state(rand_2)
+        
+        c1_colouring.local_search()
+        c2_colouring.local_search()
         
         self.children.append(c1_colouring)
         self.children.append(c2_colouring)
