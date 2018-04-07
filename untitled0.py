@@ -7,6 +7,7 @@ Created on Fri Apr  6 16:16:01 2018
 import pickle
 import numpy as np
 import GenerationColouring2 as gc
+<<<<<<< HEAD
 import copy
 
 if __name__=='__main__':
@@ -34,3 +35,11 @@ if __name__=='__main__':
     test_c[0]
     
     np.random.randint(100)
+=======
+
+if __name__=='__main__':
+    with open('Output18','rb') as fp:
+        gens = pickle.load(fp)
+        
+        
+>>>>>>> 5494ebd6f1f8fff21f149b3d2433bccfa441e8da

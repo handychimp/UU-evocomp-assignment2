@@ -284,11 +284,19 @@ class Generation:
         for colouring in self.population:
             pop_fitness.append(colouring.fitness)
         
+<<<<<<< HEAD
         x_index,x_min = min(enumerate(pop_fitness), key=operator.itemgetter(1))
         
         self.best_fitness = x_min
         
         return x_min
+=======
+        x_index,x_max = max(enumerate(pop_fitness), key=operator.itemgetter(1))
+        
+        self.best_fitness = best_fitness
+        
+        return best_fitness
+>>>>>>> 5494ebd6f1f8fff21f149b3d2433bccfa441e8da
         
     def gpx_crossover(self,x_parent,y_parent):
         #print('Crossover Started, Members: ' + str(x_parent.m_id), + ', ' + str(y_parent.m_id))
