@@ -111,7 +111,7 @@ class Colouring:
         print('Initial Fitness: ' + str(best_total_fitness))
         while non_improvement < 100:
             challenger_colouring=copy.deepcopy(self.colouring)
-            np.random.shuffle(challenger_colouring)
+            self.rand_state.shuffle(challenger_colouring)
             
             for vertex in challenger_colouring[:,0]:
                 best_colour = best_colouring[vertex]
@@ -128,7 +128,7 @@ class Colouring:
                         best_fitness = c_fitness
                         best_colour = c
                     elif c_fitness == best_fitness:
-                        if random.randint(0,1) == 0:
+                        if self.rand_state.randint(0,1) == 0:
                             challenger_colouring[vertex,1] = best_colour
                     
                 challenger_colouring[vertex,1] = best_colour
@@ -284,19 +284,11 @@ class Generation:
         for colouring in self.population:
             pop_fitness.append(colouring.fitness)
         
-<<<<<<< HEAD
         x_index,x_min = min(enumerate(pop_fitness), key=operator.itemgetter(1))
         
         self.best_fitness = x_min
         
         return x_min
-=======
-        x_index,x_max = max(enumerate(pop_fitness), key=operator.itemgetter(1))
-        
-        self.best_fitness = best_fitness
-        
-        return best_fitness
->>>>>>> 5494ebd6f1f8fff21f149b3d2433bccfa441e8da
         
     def gpx_crossover(self,x_parent,y_parent):
         #print('Crossover Started, Members: ' + str(x_parent.m_id), + ', ' + str(y_parent.m_id))
@@ -311,6 +303,9 @@ class Generation:
         x_chromosome2_len = [len(x) for x in x_chromosome2]
         y_chromosome2 = copy.deepcopy(y_parent.chromosome)
         y_chromosome2_len = [len(y) for y in y_chromosome2]
+
+        rand_seed = x_parent.rand_state.randint(100) + y_parent.rand_state.randint(100)
+        local_rand = numpy.random.RandomState(rand_seed)
         
 		##Initialise child solutions
        # print('Chromosomes set - Ready to go!')
@@ -438,7 +433,7 @@ class Generation:
                     vertex_remaining1.append(x)
                     
                 
-            np.random.shuffle(vertex_remaining1)
+            local_rand.shuffle(vertex_remaining1)
             for vertex in vertex_remaining1:
                 loop_count+=1
                 adjacent_vertex = [i for i,x in enumerate(self.graph[vertex,:]) if x]
@@ -464,7 +459,7 @@ class Generation:
                     vertex_remaining2.append(x)
                     
                 
-            np.random.shuffle(vertex_remaining2)
+            local_rand.shuffle(vertex_remaining2)
             for vertex in vertex_remaining2:
                 loop_count+=1
                 adjacent_vertex = [i for i,x in enumerate(self.graph[vertex,:]) if x]
