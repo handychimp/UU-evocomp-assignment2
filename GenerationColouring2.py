@@ -53,8 +53,8 @@ class Colouring:
                     graph_adj[i,vertex2] = True
                     graph_adj[vertex2,i] = True
                     
-                print('vertex = ' + str(i+1))
-                print('Edges added: ' + str(len(edges)))
+                #print('vertex = ' + str(i+1))
+                #print('Edges added: ' + str(len(edges)))
                 running_edges += len(edges)
                 print('Total edges: ' + str(running_edges))
                 
@@ -141,12 +141,16 @@ class Colouring:
                 best_vertex_fitness = results[1]
                 best_colouring=copy.copy(challenger_colouring)
                 non_improvement = 0
-                print('New Fitness:' + str(best_total_fitness))
+                #print('New Fitness:' + str(best_total_fitness))
             else:
                 non_improvement+=1
             
             #print('Best Fitness: ' + str(best_total_fitness) + ' Challenger Fitness: ' + str(results[0]) + ' Non-Improvement: ' + str(non_improvement))
-        print('Final Fitness:' + str(best_total_fitness))   
+        if self.m_id != None:
+            print('Final Fitness ' + str(self.m_id) +': ' + str(best_total_fitness))
+        else:
+            print('Final Fitness:' + str(best_total_fitness))   
+            
         self.colouring = best_colouring
         self.fitness = best_total_fitness
         self.vertex_fitness = best_vertex_fitness 
@@ -166,9 +170,9 @@ class Colouring:
         colouring = []
         colour = 1
         for colourset in chromosome:
-            print(colourset)
+            #print(colourset)
             for vertex in colourset:
-                print(vertex)
+                #print(vertex)
                 colouring.append([vertex,colour])
             colour += 1
         colouring=np.asarray(colouring)
@@ -186,6 +190,8 @@ class Generation:
         self.gen_number=gen_number
         if graph.shape[0] != graph.shape[1]:
             self.initialise_graph(graph)
+        else:
+            self.graph = graph
         self.colours = colours
         self.population = population
         if population == []:
@@ -210,7 +216,7 @@ class Generation:
         self.next_gen=[]
             
     def create_member(self,m_id):
-        print('Generation ' + str(self.gen_number))
+        print('Generation ' + str(self.gen_number) + ' Member ID: ' + str(m_id))
         colouring = Colouring(self.graph,colours=self.colours,m_id=m_id)
         colouring.colouring = colouring.random_colouring()
         colouring.calc_fitness()
@@ -262,10 +268,13 @@ class Generation:
         
         self.avg_fitness = avg_fitness
         
+        return avg_fitness
+        
     def gpx_crossover(self,x_parent,y_parent):
-        print('Crossover Started')
+        #print('Crossover Started, Members: ' + str(x_parent.m_id), + ', ' + str(y_parent.m_id))
         ###take the chromosome from the Colouring opjects and copy to local variables for editing
 		###Store variables a list of the length of each sublist, for selecting largest list
+        print('Starting Crossover')
         x_chromosome1 = copy.deepcopy(x_parent.chromosome)
         x_chromosome1_len = [len(x) for x in x_chromosome1]
         y_chromosome1 = copy.deepcopy(y_parent.chromosome)
@@ -276,7 +285,7 @@ class Generation:
         y_chromosome2_len = [len(y) for y in y_chromosome2]
         
 		##Initialise child solutions
-        print('Chromosomes set - Ready to go!')
+       # print('Chromosomes set - Ready to go!')
         child1=[]
         child2=[]
         
@@ -294,7 +303,7 @@ class Generation:
                 child2.append(y_chromosome2[y_index])
                 first_parent = False
                 
-                print('Group appended')
+               # print('Group appended')
                 ##For all points in the sublist selected for the x chromosome, remove it from the x and y chromosomes for that child
                 for vertex in x_chromosome1[x_index]:
                     new_y1=[]
@@ -325,13 +334,13 @@ class Generation:
 #                        #print('vertex: ' + str(vertex))
 #                        #print(partition)
                     
-                    print('x_chromo_id:' + str(id(x_chromosome2)))
-                    print('new_x_chromo_id:' + str(id(new_x2)))
+                    #print('x_chromo_id:' + str(id(x_chromosome2)))
+                    #print('new_x_chromo_id:' + str(id(new_x2)))
                     x_chromosome2 = copy.copy(new_x2)
                     #y_chromosome2 = copy.copy(new_y2)
-                    print('Assigned new_x_chromo_id:' + str(id(x_chromosome2)))
+                    #print('Assigned new_x_chromo_id:' + str(id(x_chromosome2)))
                 del y_chromosome2[y_index]
-                print('placed groups removed')
+               # print('placed groups removed')
                 
 				##Recalculate the lengths of sublists for all chromosome
                 x_chromosome1_len = [len(x) for x in x_chromosome1]
@@ -382,7 +391,7 @@ class Generation:
                 
                 del x_chromosome2[x_index]
                     
-                print('Places set removed')
+               # print('Places set removed')
     
                 x_chromosome1_len = [len(x) for x in x_chromosome1]
                 y_chromosome1_len = [len(y) for y in y_chromosome1]
@@ -392,7 +401,7 @@ class Generation:
             
         ##RANDOMLY ADD LEFT OVER POINTS IN BEST SET
         ##shuffle
-        print('Random placing the rest...')
+        #print('Random placing the rest...')
         if any(x_chromosome1):
             loop_count = 0
             vertex_remaining1 = []
@@ -412,8 +421,8 @@ class Generation:
                 p_index,p_min = min(enumerate(invalid_edges1),key=operator.itemgetter(1))
                 child1[p_index].append(vertex)
 
-            print('finished placing...')
-            print(str(loop_count) + ' vertex placed')
+            #print('finished placing...')
+            #print(str(loop_count) + ' vertex placed')
             #Don't need to remove as cycling through the list
             #[z.remove(vertex)  for z in x_chromosome1 if vertex in z]
             #Dont need as all gathered from x
@@ -438,8 +447,8 @@ class Generation:
                 p_index,p_min = min(enumerate(invalid_edges2),key=operator.itemgetter(1))
                 child2[p_index].append(vertex)
                 
-            print('finished placing...')
-            print(str(loop_count) + ' vertex placed')
+            #print('finished placing...')
+            #print(str(loop_count) + ' vertex placed')
             ##Don't need to remove as cycling through the list
             #[z.remove(vertex)  for z in x_chromosome2 if vertex in z]
             #Dont need as all gathered from x
@@ -523,8 +532,8 @@ class Generation:
             for j in i:
                 self.next_gen.append(j)
 
-        print('Length results:' + str(len(results)))
-        print('Length next_gen:' + str(len(self.next_gen)))
+        #print('Length results:' + str(len(results)))
+        print('Next Generation Created, Size: ' + str(len(self.next_gen)))
         #with open('gen_mptest','wb') as fp:
         #pickle.dump(generations,fp) 
         new_gen = Generation(graph=self.graph,colours=self.colours,population=self.next_gen,gen_number=self.gen_number+1)

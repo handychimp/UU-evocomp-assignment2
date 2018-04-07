@@ -24,18 +24,23 @@ if __name__ == '__main__':
     while no_solution:
         current_gen = gc.Generation(graph=graph,colours=c,pop_size=100)
         generations.append(current_gen)
-        fitnesses.append(current_gen.calc_avg_fitness())
+        current_gen.calc_avg_fitness()
+        fitnesses.append(current_gen.avg_fitness)
         best_fitness = current_gen.avg_fitness
         print('Generation 0 ... Avg_Fitness: ' + str(current_gen.avg_fitness))
         
         while non_improvement < 5:
             
+            if current_gen.gen_number !=0:
+                np.random.shuffle(current_gen.population)
+                
             current_gen = current_gen.create_next_gen()
             generations.append(current_gen)
-            fitnesses.append(current_gen.calc_avg_fitness())
+            current_gen.calc_avg_fitness()
+            fitnesses.append(current_gen.avg_fitness)
             
             
-            if fitnesses[current_gen.gen_number] <= fitnesses[current_gen.gen_number]:
+            if fitnesses[current_gen.gen_number-1] <= fitnesses[current_gen.gen_number]:
                 non_improvement+=1
             else:
                 non_improvement = 0
@@ -48,7 +53,7 @@ if __name__ == '__main__':
         filename = 'Output' + str(c)
         with open(filename,'wb') as fp:
             pickle.dump(generations,fp) 
-        if current_gen.avg_fitness == 0:
+        if current_gen.avg_fitness != 0:
             no_solution = False
         else:
             c=c-1
