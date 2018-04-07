@@ -484,8 +484,8 @@ class Generation:
         c2_colouring = c2_colouring.colouring_from_chromosome(child2)
         rand_1 = x_parent.rand_state.randint(100) + y_parent.rand_state.randint(100)
         rand_2 = x_parent.rand_state.randint(100) + y_parent.rand_state.randint(100)
-        c1_colouring.rand_state = np.random.randomstate(rand_1)
-        c1_colouring.rand_state = np.random.randomstate(rand_2)
+        c1_colouring.rand_state = np.random.RandomState(rand1)
+        c1_colouring.rand_state = np.random.RandomState(rand_2)
         
         c1_colouring.local_search()
         c2_colouring.local_search()
