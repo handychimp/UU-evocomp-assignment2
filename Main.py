@@ -17,19 +17,23 @@ if __name__ == '__main__':
     c=18
     generations = []
     fitnesses =[]
+    best_individual=[]
     non_improvement=0
     no_solution = True
     best_fitness = None
     
-    while no_solution:
+    while no_solution and c>0:
         current_gen = gc.Generation(graph=graph,colours=c,pop_size=100)
         generations.append(current_gen)
         current_gen.calc_avg_fitness()
         fitnesses.append(current_gen.avg_fitness)
-        best_fitness = current_gen.avg_fitness
+        current_gen.calc_best_fitness()
+        best_individual.append(current_gen.best_fitness) 
+        best_fitness = current_gen.best_fitness
+
         print('Generation 0 ... Avg_Fitness: ' + str(current_gen.avg_fitness))
         
-        while non_improvement < 5:
+        while non_improvement < 5 and best_fitness != 0:
             
             if current_gen.gen_number !=0:
                 np.random.shuffle(current_gen.population)
@@ -38,15 +42,16 @@ if __name__ == '__main__':
             generations.append(current_gen)
             current_gen.calc_avg_fitness()
             fitnesses.append(current_gen.avg_fitness)
+            current_gen.calc_best_fitness()
+            best_individual.append(current_gen.best_fitness)            
             
-            
-            if fitnesses[current_gen.gen_number-1] <= fitnesses[current_gen.gen_number]:
+            if best_individual[current_gen.gen_number-1] <= best_individual[current_gen.gen_number]:
                 non_improvement+=1
             else:
                 non_improvement = 0
-                best_fitness = current_gen.avg_fitness
+                best_fitness = current_gen.best_fitness
             
-            print('Generation ' +str(current_gen.gen_number) + ' ... Avg_Fitness: ' + str(current_gen.avg_fitness))
+            print('Generation ' +str(current_gen.gen_number) + ' ... Gens Best fitness: ' + str(current_gen.best_fitness))
             print('Best Fitness: ' + str(best_fitness))
             print('Generations without improvement: ' + str(non_improvement))
             

@@ -275,11 +275,11 @@ class Generation:
         for colouring in self.population:
             pop_fitness.append(colouring.fitness)
         
-        x_index,x_max = max(enumerate(pop_fitness), key=operator.itemgetter(1))
+        x_index,x_min = min(enumerate(pop_fitness), key=operator.itemgetter(1))
         
-        self.best_fitness = best_fitness
+        self.best_fitness = x_min
         
-        return best_fitness
+        return x_min
         
     def gpx_crossover(self,x_parent,y_parent):
         #print('Crossover Started, Members: ' + str(x_parent.m_id), + ', ' + str(y_parent.m_id))
@@ -427,7 +427,7 @@ class Generation:
                 adjacent_vertex = [i for i,x in enumerate(self.graph[vertex,:]) if x]
                 invalid_edges1 = []
                 for partition in child1:
-                    invalid_edges1.append(len(set(adjacent_vertex) & set(partition)))
+                    invalid_edges1.append(len(set(adjacent_vertex) and set(partition)))
             
                 p_index,p_min = min(enumerate(invalid_edges1),key=operator.itemgetter(1))
                 child1[p_index].append(vertex)
@@ -453,7 +453,7 @@ class Generation:
                 adjacent_vertex = [i for i,x in enumerate(self.graph[vertex,:]) if x]
                 invalid_edges2 = []
                 for partition in child2:
-                    invalid_edges2.append(len(set(adjacent_vertex) & set(partition)))
+                    invalid_edges2.append(len(set(adjacent_vertex) and set(partition)))
             
                 p_index,p_min = min(enumerate(invalid_edges2),key=operator.itemgetter(1))
                 child2[p_index].append(vertex)
