@@ -27,14 +27,10 @@ if __name__ == '__main__':
         generations.append(current_gen)
         current_gen.calc_avg_fitness()
         fitnesses.append(current_gen.avg_fitness)
-<<<<<<< HEAD
         current_gen.calc_best_fitness()
         best_individual.append(current_gen.best_fitness) 
         best_fitness = current_gen.best_fitness
 
-=======
-        best_fitness = current_gen.avg_fitness
->>>>>>> 5494ebd6f1f8fff21f149b3d2433bccfa441e8da
         print('Generation 0 ... Avg_Fitness: ' + str(current_gen.avg_fitness))
         
         while non_improvement < 5 and best_fitness != 0:
@@ -46,16 +42,10 @@ if __name__ == '__main__':
             generations.append(current_gen)
             current_gen.calc_avg_fitness()
             fitnesses.append(current_gen.avg_fitness)
-<<<<<<< HEAD
             current_gen.calc_best_fitness()
             best_individual.append(current_gen.best_fitness)            
             
             if best_individual[current_gen.gen_number-1] <= best_individual[current_gen.gen_number]:
-=======
-            
-            
-            if fitnesses[current_gen.gen_number-1] <= fitnesses[current_gen.gen_number]:
->>>>>>> 5494ebd6f1f8fff21f149b3d2433bccfa441e8da
                 non_improvement+=1
             else:
                 non_improvement = 0
