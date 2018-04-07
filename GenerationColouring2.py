@@ -306,7 +306,7 @@ class Generation:
         y_chromosome2_len = [len(y) for y in y_chromosome2]
 
         rand_seed = x_parent.rand_state.randint(100) + y_parent.rand_state.randint(100)
-        local_rand = numpy.random.RandomState(rand_seed)
+        local_rand = np.random.RandomState(rand_seed)
         
 		##Initialise child solutions
        # print('Chromosomes set - Ready to go!')
@@ -484,8 +484,8 @@ class Generation:
         c2_colouring = c2_colouring.colouring_from_chromosome(child2)
         rand_1 = x_parent.rand_state.randint(100) + y_parent.rand_state.randint(100)
         rand_2 = x_parent.rand_state.randint(100) + y_parent.rand_state.randint(100)
-        c1_colouring.rand_state = np.random.rand_state(rand_1)
-        c1_colouring.rand_state = np.random.rand_state(rand_2)
+        c1_colouring.rand_state = np.random.randomstate(rand_1)
+        c1_colouring.rand_state = np.random.randomstate(rand_2)
         
         c1_colouring.local_search()
         c2_colouring.local_search()
