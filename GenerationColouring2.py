@@ -14,7 +14,7 @@ import pickle
 
 class Colouring:
     
-    def __init__(self,graph,colouring=[[]],colours=1,m_id=None):
+    def __init__(self,graph,colouring=[[]],colours=1,m_id=None,chromosome=None):
         
         if graph.shape[0] != graph.shape[1]:
             self.initialise_graph(graph)
@@ -26,6 +26,7 @@ class Colouring:
         self.fitness=None
         self.rand_state=None
         self.m_id=m_id
+        self.chromosome = chromosome
 
     def initialise_graph(self,graph):
         
@@ -103,7 +104,7 @@ class Colouring:
         return [int(total_fitness),v_fitness]
     
     def local_search(self):
-        best_colouring = copy.copy(self.colouring)
+        best_colouring = copy.deepcopy(self.colouring)
         best_vertex_fitness = self.vertex_fitness
         best_total_fitness = self.fitness
         non_improvement = 0
@@ -128,7 +129,7 @@ class Colouring:
                         best_fitness = c_fitness
                         best_colour = c
                     elif c_fitness == best_fitness:
-                        if self.rand_state.randint(0,1) == 0:
+                        if self.rand_state.randint(0,2):
                             challenger_colouring[vertex,1] = best_colour
                     
                 challenger_colouring[vertex,1] = best_colour
@@ -156,6 +157,83 @@ class Colouring:
         self.vertex_fitness = best_vertex_fitness 
         return self.fitness
     
+    def create_index(self,chromosome):
+        vertex_index = []
+        for i in range(0,len(chromosome)):
+            for j in range(0,len(chromosome[i])):
+                vertex_index.append([chromosome[i][j],i,j])
+                
+        vertex_index = np.asarray(vertex_index)
+        vertex_index.argsort()
+        #self.vertex_index = vertex_index
+        
+        return vertex_index
+        
+    def local_search2(self):
+
+        self.vertex_index = self.create_index(self.chromosome)
+        index_order = copy.deepcopy(self.vertex_index[:,0])
+        self.rand_state.shuffle(index_order)
+        
+        best_fitness = self.fitness
+        best_chromosome = copy.deepcopy(self.chromosome)
+        non_improvement = 0
+        
+        print('Initial Fitness:' + str(best_fitness))
+        while non_improvement <100:
+            self.rand_state.shuffle(index_order)
+            for vertex in index_order:
+
+                new_chromosome = copy.deepcopy(self.chromosome)
+                main_idx = np.asarray(self.vertex_index[vertex])
+                adjacent_vertex = [i for i,x in enumerate(self.graph[vertex,:]) if x]
+                invalid_edges = []
+                for partition in self.chromosome:
+                    invalid_edges.append(len(set(adjacent_vertex) and set(partition)))
+            
+                p_index,p_min = min(enumerate(invalid_edges),key=operator.itemgetter(1))
+                partition_choice = []
+                for i in range(0,len(invalid_edges)):
+                    if invalid_edges[i] == p_min:
+                        partition_choice.append(i)
+                
+                i_index = self.rand_state.randint(0,len(partition_choice))
+                p_index = partition_choice[i_index]
+                
+                #print (main_idx)
+                del new_chromosome[main_idx[1]][main_idx[2]]
+                new_chromosome[p_index].append(vertex)
+                self.create_index(new_chromosome)
+            
+            challenger_fitness = self.calc_fitness2(new_chromosome)
+             
+            if challenger_fitness < best_fitness:
+                 best_fitness = challenger_fitness
+                 best_chromosome = copy.deepcopy(best_chromosome)
+                 non_improvement = 0
+                 print('New Fitness:' + str(best_fitness))
+            elif challenger_fitness == best_fitness:
+                if self.rand_state.randint(0,2):
+                    best_fitness = challenger_fitness
+                    best_chromosome = copy.deepcopy(best_chromosome)
+                else:
+                    non_improvement += 1
+            else:
+                non_improvement += 1
+        print('Final Fitness:' + str(best_fitness))
+        return self.chromosome
+     
+    def calc_fitness2(self,chromosome):
+        running_fitness = 0
+        for partition in self.chromosome:
+            for vertex in partition:
+                adjacent_vertex = [i for i,x in enumerate(self.graph[vertex,:]) if x]
+                running_fitness += len(adjacent_vertex)
+        
+        running_fitness = int(running_fitness/2)
+        
+        return running_fitness
+        
     def make_chromosome(self):
         chromosome=[]
         
@@ -306,7 +384,7 @@ class Generation:
         y_chromosome2_len = [len(y) for y in y_chromosome2]
 
         rand_seed = x_parent.rand_state.randint(100) + y_parent.rand_state.randint(100)
-        local_rand = numpy.random.RandomState(rand_seed)
+        local_rand = np.random.RandomState(rand_seed)
         
 		##Initialise child solutions
        # print('Chromosomes set - Ready to go!')
@@ -478,14 +556,12 @@ class Generation:
             #Dont need as all gathered from x
             #[z.remove(vertex)  for z in y_chromosome1 if vertex in z]
         #return (child1,child2,x_chromosome1,x_chromosome2,vertex_remaining1,vertex_remaining2)
-        c1_colouring = Colouring(graph=self.graph,colours=self.colours)
-        c2_colouring = Colouring(graph=self.graph,colours=self.colours)
-        c1_colouring = c1_colouring.colouring_from_chromosome(child1)
-        c2_colouring = c2_colouring.colouring_from_chromosome(child2)
+        c1_colouring = x_parent.colouring_from_chromosome(child1)
+        c2_colouring = y_parent.colouring_from_chromosome(child2)
         rand_1 = x_parent.rand_state.randint(100) + y_parent.rand_state.randint(100)
         rand_2 = x_parent.rand_state.randint(100) + y_parent.rand_state.randint(100)
-        c1_colouring.rand_state = np.random.rand_state(rand_1)
-        c1_colouring.rand_state = np.random.rand_state(rand_2)
+        c1_colouring.rand_state = np.random.RandomState(rand_1)
+        c2_colouring.rand_state = np.random.RandomState(rand_2)
         
         c1_colouring.local_search()
         c2_colouring.local_search()
@@ -548,8 +624,19 @@ class Generation:
         print('Pop_size: ' + str(self.pop_size))
         print('Half_pop: ' + str(half_pop))
         pool_args = []
-        for i in range (0,half_pop):
-            pool_args.append((self.population[2*i],self.population[2*i+1]))    
+        mating_pool = list(range(0,100))
+        while len(mating_pool) > 0:
+            idx1 = np.random.randint(0,len(mating_pool))
+            del mating_pool[idx1]
+            
+            idx2 = np.random.randint(0,len(mating_pool))
+            del mating_pool[idx2]
+            
+            pool_args.append((self.population[idx1],self.population[idx2]))
+            
+        
+    #    for i in range (0,half_pop):
+     #       pool_args.append((self.population[2*i],self.population[2*i+1]))    
          
         p=Pool()
         results = p.starmap(self.gpx_crossover,pool_args)
