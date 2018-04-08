@@ -556,12 +556,22 @@ class Generation:
             #Dont need as all gathered from x
             #[z.remove(vertex)  for z in y_chromosome1 if vertex in z]
         #return (child1,child2,x_chromosome1,x_chromosome2,vertex_remaining1,vertex_remaining2)
+<<<<<<< HEAD
         c1_colouring = x_parent.colouring_from_chromosome(child1)
         c2_colouring = y_parent.colouring_from_chromosome(child2)
+=======
+        c1_colouring = Colouring(graph=self.graph,colours=self.colours)
+        c2_colouring = Colouring(graph=self.graph,colours=self.colours)
+>>>>>>> 31750b5fa04d879a17a1fbcbe90537e09ace27dd
         rand_1 = x_parent.rand_state.randint(100) + y_parent.rand_state.randint(100)
         rand_2 = x_parent.rand_state.randint(100) + y_parent.rand_state.randint(100)
         c1_colouring.rand_state = np.random.RandomState(rand_1)
         c2_colouring.rand_state = np.random.RandomState(rand_2)
+<<<<<<< HEAD
+=======
+        c1_colouring = c1_colouring.colouring_from_chromosome(child1)
+        c2_colouring = c2_colouring.colouring_from_chromosome(child2)
+>>>>>>> 31750b5fa04d879a17a1fbcbe90537e09ace27dd
         
         c1_colouring.local_search()
         c2_colouring.local_search()
