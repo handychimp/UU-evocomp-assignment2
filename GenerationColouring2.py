@@ -152,7 +152,7 @@ class Colouring:
         else:
             print('Final Fitness:' + str(best_total_fitness))   
             
-        self.colouring = best_colouring
+        self.colouring = copy.deepcopy(best_colouring)
         self.fitness = best_total_fitness
         self.vertex_fitness = best_vertex_fitness 
         return self.fitness
@@ -310,7 +310,7 @@ class Generation:
         colouring.local_search()
         colouring.make_chromosome()
 
-        self.population.append(colouring)
+        self.population.append(copy.deepcopy(colouring))
         
         return colouring        
     
@@ -438,7 +438,7 @@ class Generation:
                     
                     #print('x_chromo_id:' + str(id(x_chromosome2)))
                     #print('new_x_chromo_id:' + str(id(new_x2)))
-                    x_chromosome2 = copy.copy(new_x2)
+                    x_chromosome2 = copy.deepcopy(new_x2)
                     #y_chromosome2 = copy.copy(new_y2)
                     #print('Assigned new_x_chromo_id:' + str(id(x_chromosome2)))
                 del y_chromosome2[y_index]
@@ -472,7 +472,7 @@ class Generation:
 #                        partition[:]=[y for y in partition if y != vertex]
 #                        new_y1.append(partition)
                     
-                    x_chromosome1 = copy.copy(new_x1)
+                    x_chromosome1 = copy.deepcopy(new_x1)
                     #y_chromosome1 = copy.copy(new_y2)
                 del y_chromosome1[y_index]
 
@@ -488,8 +488,8 @@ class Generation:
                         partition[:]=[y for y in partition if y != vertex]
                         new_y2.append(partition)
                     
-                    x_chromosome2 = copy.copy(new_x2)
-                    y_chromosome2 = copy.copy(new_y2)
+                    x_chromosome2 = copy.deepcopy(new_x2)
+                    y_chromosome2 = copy.deepcopy(new_y2)
                 
                 del x_chromosome2[x_index]
                     
@@ -600,10 +600,10 @@ class Generation:
         parents.append(p2)
         
         family = [] 
-        family.append(c1)
-        family.append(c2)
-        family.append(p1)
-        family.append(p2)
+        family.append(copy.deepcopy(c1))
+        family.append(copy.deepcopy(c2))
+        family.append(copy.deepcopy(p1))
+        family.append(copy.deepcopy(p2))
         
         family_fitness = [x.fitness for x in family]
         f_index,f_min = min(enumerate(family_fitness),key=operator.itemgetter(1))
