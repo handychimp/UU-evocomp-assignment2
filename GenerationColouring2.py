@@ -556,22 +556,14 @@ class Generation:
             #Dont need as all gathered from x
             #[z.remove(vertex)  for z in y_chromosome1 if vertex in z]
         #return (child1,child2,x_chromosome1,x_chromosome2,vertex_remaining1,vertex_remaining2)
-<<<<<<< HEAD
         c1_colouring = x_parent.colouring_from_chromosome(child1)
         c2_colouring = y_parent.colouring_from_chromosome(child2)
-=======
-        c1_colouring = Colouring(graph=self.graph,colours=self.colours)
-        c2_colouring = Colouring(graph=self.graph,colours=self.colours)
->>>>>>> 31750b5fa04d879a17a1fbcbe90537e09ace27dd
+
         rand_1 = x_parent.rand_state.randint(100) + y_parent.rand_state.randint(100)
         rand_2 = x_parent.rand_state.randint(100) + y_parent.rand_state.randint(100)
         c1_colouring.rand_state = np.random.RandomState(rand_1)
         c2_colouring.rand_state = np.random.RandomState(rand_2)
-<<<<<<< HEAD
-=======
-        c1_colouring = c1_colouring.colouring_from_chromosome(child1)
-        c2_colouring = c2_colouring.colouring_from_chromosome(child2)
->>>>>>> 31750b5fa04d879a17a1fbcbe90537e09ace27dd
+
         
         c1_colouring.local_search()
         c2_colouring.local_search()
@@ -579,8 +571,8 @@ class Generation:
         self.children.append(c1_colouring)
         self.children.append(c2_colouring)
         selected1, selected2 = self.family_tournament(x_parent,y_parent,c1_colouring,c2_colouring)
-        self.next_gen.append(selected1)
-        self.next_gen.append(selected2)
+        #self.next_gen.append(selected1)
+        #self.next_gen.append(selected2)
         
         return (selected1,selected2)
     
@@ -658,12 +650,14 @@ class Generation:
        
         for i in results:
             for j in i:
-                self.next_gen.append(j)
-
-        #print('Length results:' + str(len(results)))
+                individual = copy.deepcopy(j)
+                self.next_gen.append(individual)
+        
+        print('Length results:' + str(len(results)))
         print('Next Generation Created, Size: ' + str(len(self.next_gen)))
-        #with open('gen_mptest','wb') as fp:
-        #pickle.dump(generations,fp) 
+        filename = 'test_output_gen' + str(self.gen_number)
+        with open(filename,'wb') as fp:
+            pickle.dump(self.next_gen,fp) 
         new_gen = Generation(graph=self.graph,colours=self.colours,population=self.next_gen,gen_number=self.gen_number+1)
         
         return new_gen

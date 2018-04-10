@@ -21,8 +21,9 @@ if __name__ == '__main__':
     non_improvement=0
     no_solution = True
     best_fitness = None
+   
     
-    while no_solution and c>0:
+    while no_solution and c>0 and c==18:
         current_gen = gc.Generation(graph=graph,colours=c,pop_size=100)
         generations.append(current_gen)
         current_gen.calc_avg_fitness()
@@ -33,7 +34,7 @@ if __name__ == '__main__':
 
         print('Generation 0 ... Avg_Fitness: ' + str(current_gen.avg_fitness))
         
-        while non_improvement < 5 and best_fitness != 0:
+        while non_improvement < 5 and best_fitness != 0 and current_gen.gen_number<10:
             
             if current_gen.gen_number !=0:
                 np.random.shuffle(current_gen.population)
@@ -54,7 +55,7 @@ if __name__ == '__main__':
             print('Generation ' +str(current_gen.gen_number) + ' ... Gens Best fitness: ' + str(current_gen.best_fitness))
             print('Best Fitness: ' + str(best_fitness))
             print('Generations without improvement: ' + str(non_improvement))
-            
+        
         filename = 'Output' + str(c)
         with open(filename,'wb') as fp:
             pickle.dump(generations,fp) 
