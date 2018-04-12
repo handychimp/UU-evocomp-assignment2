@@ -265,7 +265,7 @@ class Colouring:
             pointer += 1
         
         
-        new_colouring = Colouring(self.graph,colouring=colouring2,colours=self.colours)
+        new_colouring = Colouring(self.graph,colouring=copy.deepcopy(colouring2),colours=self.colours)
         new_colouring.calc_fitness()
         #new_colouring.local_search()
         #new_colouring.make_chromosome()
@@ -306,12 +306,13 @@ class Generation:
             
     def create_member(self,m_id):
         print('Generation ' + str(self.gen_number) + ' Member ID: ' + str(m_id))
-        colouring = Colouring(self.graph,colours=self.colours,m_id=m_id)
-        colouring.rand_state=np.random.RandomState(colouring.m_id)
+        colouring = Colouring(self.graph,colours=self.colours)
+        colouring.rand_state=np.random.RandomState(m_id)
         colouring.colouring = colouring.random_colouring()
         colouring.calc_fitness()
         colouring.local_search()
         colouring.make_chromosome()
+        colouring.m_id = '0-' + str(m_id)
 
         self.population.append(copy.deepcopy(colouring))
         
@@ -569,8 +570,8 @@ class Generation:
         c1_colouring.parents = (x_parent.m_id,y_parent.m_id)
         c2_colouring.parents = (x_parent.m_id,y_parent.m_id)
         
-        m_id1 = str(gen) + str(x_parent.m_id)
-        m_id2 = str(gen) + str(y_parent.m_id)
+        m_id1 = str(gen) + '-' + str(x_parent.m_id)
+        m_id2 = str(gen) + '-' + str(y_parent.m_id)
         
         c1_colouring.m_id = int(m_id1)
         c2_colouring.m_id = int(m_id2)
@@ -657,15 +658,15 @@ class Generation:
 
         with open('results_mptest','wb') as fp:
             pickle.dump(results,fp)  
-       
+        next_gen = []
         for i in results:
             for j in range(0,2):
-                individual = copy.deepcopy(results[j])
-                self.next_gen.append(individual)
+                individual = i[j]
+                self.next_gen.append(copy.deepcopy(individual))
             
             for j in range(2,4):
-                individual = copy.deepcopy(results[j])
-                self.children.append(j)
+                individual = i[j]
+                self.children.append(copy.deepcopy(individual))
         
         print('Length results:' + str(len(results)))
         print('Next Generation Created, Size: ' + str(len(self.next_gen)))
