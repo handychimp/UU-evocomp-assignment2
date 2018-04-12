@@ -108,8 +108,11 @@ class Colouring:
         best_vertex_fitness = self.vertex_fitness
         best_total_fitness = self.fitness
         non_improvement = 0
+        if self.m_id != None:
+            print('Initial Fitness ' + str(self.m_id) + ': ' + str(best_total_fitness))
+        else:
+            print('Initial Fitness: ' + str(best_total_fitness))
         
-        print('Initial Fitness: ' + str(best_total_fitness))
         while non_improvement < 100:
             challenger_colouring=copy.deepcopy(self.colouring)
             self.rand_state.shuffle(challenger_colouring)
@@ -369,7 +372,7 @@ class Generation:
         
         return x_min
         
-    def gpx_crossover(self,x_parent,y_parent):
+    def gpx_crossover(self,x_parent,y_parent,gen=None):
         #print('Crossover Started, Members: ' + str(x_parent.m_id), + ', ' + str(y_parent.m_id))
         ###take the chromosome from the Colouring opjects and copy to local variables for editing
 		###Store variables a list of the length of each sublist, for selecting largest list
@@ -563,7 +566,14 @@ class Generation:
         rand_2 = x_parent.rand_state.randint(100) + y_parent.rand_state.randint(100)
         c1_colouring.rand_state = np.random.RandomState(rand_1)
         c2_colouring.rand_state = np.random.RandomState(rand_2)
-
+        c1_colouring.parents = (x_parent.m_id,y_parent.m_id)
+        c2_colouring.parents = (x_parent.m_id,y_parent.m_id)
+        
+        m_id1 = str(gen) + str(x_parent.m_id)
+        m_id2 = str(gen) + str(y_parent.m_id)
+        
+        c1_colouring.m_id = int(m_id1)
+        c2_colouring.m_id = int(m_id2)
         
         c1_colouring.local_search()
         c2_colouring.local_search()
@@ -574,7 +584,7 @@ class Generation:
         #self.next_gen.append(selected1)
         #self.next_gen.append(selected2)
         
-        return (selected1,selected2)
+        return (selected1,selected2,c1_colouring,c2_colouring)
     
     def colouring_from_chromosome(self,chromosome):
         colouring = []
@@ -634,7 +644,7 @@ class Generation:
             idx2 = np.random.randint(0,len(mating_pool))
             del mating_pool[idx2]
             
-            pool_args.append((self.population[idx1],self.population[idx2]))
+            pool_args.append((self.population[idx1],self.population[idx2],self.gen_number))
             
         
     #    for i in range (0,half_pop):
@@ -649,15 +659,21 @@ class Generation:
             pickle.dump(results,fp)  
        
         for i in results:
-            for j in i:
-                individual = copy.deepcopy(j)
+            for j in range(0,2):
+                individual = copy.deepcopy(results[j])
                 self.next_gen.append(individual)
+            
+            for j in range(2,4):
+                individual = copy.deepcopy(results[j])
+                self.children.append(j)
         
         print('Length results:' + str(len(results)))
         print('Next Generation Created, Size: ' + str(len(self.next_gen)))
         filename = 'test_output_gen' + str(self.gen_number)
         with open(filename,'wb') as fp:
             pickle.dump(self.next_gen,fp) 
-        new_gen = Generation(graph=self.graph,colours=self.colours,population=self.next_gen,gen_number=self.gen_number+1)
+        
+        next_gen = copy.deepcopy(self.next_gen)
+        new_gen = Generation(graph=self.graph,colours=self.colours,population=next_gen,gen_number=self.gen_number+1)
         
         return new_gen
