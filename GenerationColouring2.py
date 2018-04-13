@@ -311,7 +311,7 @@ class Generation:
         colouring.colouring = colouring.random_colouring()
         colouring.calc_fitness()
         colouring.local_search()
-        colouring.make_chromosome()
+        colouring.chromosome = colouring.make_chromosome()
         colouring.m_id = '0-' + str(m_id)
 
         self.population.append(copy.deepcopy(colouring))
@@ -570,14 +570,17 @@ class Generation:
         c1_colouring.parents = (x_parent.m_id,y_parent.m_id)
         c2_colouring.parents = (x_parent.m_id,y_parent.m_id)
         
-        m_id1 = str(gen) + '-' + str(x_parent.m_id)
-        m_id2 = str(gen) + '-' + str(y_parent.m_id)
+        m_id1 = str(x_parent.m_id)
+        m_id2 = str(y_parent.m_id)
         
-        c1_colouring.m_id = int(m_id1)
-        c2_colouring.m_id = int(m_id2)
+
+        c1_colouring.m_id = str(gen+1) + m_id1[1:]
+        c2_colouring.m_id = str(gen+1) + m_id2[1:]
         
         c1_colouring.local_search()
         c2_colouring.local_search()
+        c1_colouring.chromosome = c1_colouring.make_chromosome()
+        c2_colouring.chromosome = c2_colouring.make_chromosome()
         
         self.children.append(c1_colouring)
         self.children.append(c2_colouring)
@@ -598,7 +601,7 @@ class Generation:
         new_colouring = Colouring(self.graph,colouring=colouring,colours=self.colours)
         new_colouring.calc_fitness()
         new_colouring.local_search()
-        new_colouring.make_chromosome()
+        new_colouring.chromosome = new_colouring.make_chromosome()
         self.children.append(new_colouring)
         
         return new_colouring        
@@ -616,16 +619,33 @@ class Generation:
         family.append(copy.deepcopy(p1))
         family.append(copy.deepcopy(p2))
         
-        family_fitness = [x.fitness for x in family]
-        f_index,f_min = min(enumerate(family_fitness),key=operator.itemgetter(1))
+#        family_fitness = [x.fitness for x in family]
+#        f_index,f_min = min(enumerate(family_fitness),key=operator.itemgetter(1))
+#        del family_fitness[f_index]
+#        del family[f_index]
         
         selected = []
-        selected.append(family[f_index])
-        del family_fitness[f_index]
-        del family[f_index]
+        selected.append(family[0])
+        selected.append(family[1])
         
-        f_index,f_min = min(enumerate(family_fitness),key=operator.itemgetter(1))
-        selected.append(family[f_index])
+        if family[2].fitness < selected[1].fitness:
+            if selected[1].fitness < selected[0].fitness:
+                selected[0]= copy.deepcopy(family[2])
+            else:
+                selected[1] = copy.deepcopy(family[2])
+        elif family[2].fitness < selected[0].fitness:
+            selected[0] = copy.deepcopy(family[2])
+            
+        if family[3].fitness < selected[1].fitness:
+            if selected[1].fitness < selected[0].fitness:
+                selected[0]= copy.deepcopy(family[3])
+            else:
+                selected[1] = copy.deepcopy(family[3])
+        elif family[3].fitness < selected[0].fitness:
+            selected[0] = copy.deepcopy(family[3])
+        
+#        f_index,f_min = min(enumerate(family_fitness),key=operator.itemgetter(1))
+#        selected.append(family[f_index])
     
         print('Selection complete')
         return (selected[0],selected[1])
@@ -637,7 +657,7 @@ class Generation:
         print('Pop_size: ' + str(self.pop_size))
         print('Half_pop: ' + str(half_pop))
         pool_args = []
-        mating_pool = list(range(0,100))
+        mating_pool = list(range(0,self.pop_size))
         while len(mating_pool) > 0:
             idx1 = np.random.randint(0,len(mating_pool))
             del mating_pool[idx1]

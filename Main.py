@@ -24,20 +24,20 @@ if __name__ == '__main__':
    
     
     while no_solution and c>0 and c==18:
-        current_gen = gc.Generation(graph=graph,colours=c,pop_size=100)
+        current_gen = gc.Generation(graph=graph,colours=c,pop_size=12)
         generations.append(current_gen)
         current_gen.calc_avg_fitness()
         fitnesses.append(current_gen.avg_fitness)
-        current_gen.calc_best_fitness()
+        current_gen.best_fitness=current_gen.calc_best_fitness()
         best_individual.append(current_gen.best_fitness) 
         best_fitness = current_gen.best_fitness
 
         print('Generation 0 ... Avg_Fitness: ' + str(current_gen.avg_fitness))
         
-        while non_improvement < 5 and best_fitness != 0 and current_gen.gen_number<10:
+        while non_improvement < 5 and best_fitness != 0 and current_gen.gen_number<6:
             
-            if current_gen.gen_number !=0:
-                np.random.shuffle(current_gen.population)
+#            if current_gen.gen_number !=0:
+#                np.random.shuffle(current_gen.population)
                 
             current_gen = current_gen.create_next_gen()
             generations.append(current_gen)
