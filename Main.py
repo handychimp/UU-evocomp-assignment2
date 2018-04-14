@@ -23,43 +23,44 @@ if __name__ == '__main__':
     best_fitness = None
    
     
-    while no_solution and c>0 and c==18:
-        current_gen = gc.Generation(graph=graph,colours=c,pop_size=12)
+    while no_solution and c>13:
+        current_gen = gc.Generation(graph=graph,colours=c,pop_size=100)
         generations.append(current_gen)
         current_gen.calc_avg_fitness()
         fitnesses.append(current_gen.avg_fitness)
         current_gen.best_fitness=current_gen.calc_best_fitness()
         best_individual.append(current_gen.best_fitness) 
         best_fitness = current_gen.best_fitness
-
+        run = 1
         print('Generation 0 ... Avg_Fitness: ' + str(current_gen.avg_fitness))
         
-        while non_improvement < 5 and best_fitness != 0 and current_gen.gen_number<6:
-            
-#            if current_gen.gen_number !=0:
-#                np.random.shuffle(current_gen.population)
+        for i in range(1,6):
+            while non_improvement < 5 and best_fitness != 0 and current_gen.gen_number<25:
                 
-            current_gen = current_gen.create_next_gen()
-            generations.append(current_gen)
-            current_gen.calc_avg_fitness()
-            fitnesses.append(current_gen.avg_fitness)
-            current_gen.calc_best_fitness()
-            best_individual.append(current_gen.best_fitness)            
+    #            if current_gen.gen_number !=0:
+    #                np.random.shuffle(current_gen.population)
+                    
+                current_gen = current_gen.create_next_gen()
+                generations.append(current_gen)
+                current_gen.calc_avg_fitness()
+                fitnesses.append(current_gen.avg_fitness)
+                current_gen.calc_best_fitness()
+                best_individual.append(current_gen.best_fitness)            
+                
+                if best_individual[current_gen.gen_number-1] <= best_individual[current_gen.gen_number]:
+                    non_improvement+=1
+                else:
+                    non_improvement = 0
+                    best_fitness = current_gen.best_fitness
+                
+                print('Generation ' +str(current_gen.gen_number) + ' ... Gens Best fitness: ' + str(current_gen.best_fitness))
+                print('Best Fitness: ' + str(best_fitness))
+                print('Generations without improvement: ' + str(non_improvement))
             
-            if best_individual[current_gen.gen_number-1] <= best_individual[current_gen.gen_number]:
-                non_improvement+=1
+            filename = 'Output' +str(i) + '-' + str(c)
+            with open(filename,'wb') as fp:
+                pickle.dump(generations,fp) 
+            if current_gen.avg_fitness != 0:
+                no_solution = False
             else:
-                non_improvement = 0
-                best_fitness = current_gen.best_fitness
-            
-            print('Generation ' +str(current_gen.gen_number) + ' ... Gens Best fitness: ' + str(current_gen.best_fitness))
-            print('Best Fitness: ' + str(best_fitness))
-            print('Generations without improvement: ' + str(non_improvement))
-        
-        filename = 'Output' + str(c)
-        with open(filename,'wb') as fp:
-            pickle.dump(generations,fp) 
-        if current_gen.avg_fitness != 0:
-            no_solution = False
-        else:
-            c=c-1
+                c=c-1
